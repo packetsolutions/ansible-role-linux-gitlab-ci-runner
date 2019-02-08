@@ -1,0 +1,38 @@
+---
+- name: 'debian | add gitlab gpg key without proxy'
+  apt_key:
+    url: 'https://packages.gitlab.com/gpg.key'
+    state: 'present'
+  when: os_proxy is undefined
+  become: yes
+
+- name: 'debian | add gitlab gpg key with proxy'
+  environment:
+    http_proxy: "{{ os_proxy }}"
+    https_proxy: "{{ os_proxy }}"
+  apt_key:
+    url: 'https://packages.gitlab.com/gpg.key'
+    state: 'present'
+  when: os_proxy is defined
+  become: yes
+
+- name: 'debian | install dependencies'
+  apt:
+    name: '{{ item }}'
+    state: present
+  with_items:
+    - 'debian-archive-keyring'
+    - 'apt-transport-https'
+  become: yes
+
+- name: 'debian | add gitlab apt repository'
+  apt_repository:
+    repo: 'deb https://packages.gitlab.com/runner/gitlab-ci-multi-runner/{{ ansible_distribution | lower }}/ {{ ansible_distribution_major_version }} main'
+    state: present
+  become: yes
+
+- name: 'debian | install gitlab runner'
+  apt:
+    name: 'gitlab-ci-multi-runner'
+    state: present
+  become: yes

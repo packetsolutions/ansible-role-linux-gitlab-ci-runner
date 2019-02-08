@@ -1,0 +1,4 @@
+---
+- name: 'debian | install'
+  include: debian-install.yml
+  when: ansible_os_family == 'Debian'
